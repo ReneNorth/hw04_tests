@@ -23,13 +23,13 @@ class PostTest(unittest.TestCase):
 
     def test_str_post(self):
         """ MODELS | Тест вывод 15 символов поста """
-        post = PostTest.post
+        test_post = PostTest.post
         max_len = 15
-        text_len = len(str(post))
+        text_len = len(str(test_post))
         self.assertEqual(text_len, max_len)
 
     def test_group_titile(self):
         """ MODELS | Тест совпадения title """
-        group = PostTest.group
-        expected_group_name = group.title
-        self.assertEqual(expected_group_name, str(group))
+        test_group = PostTest.group
+        expected_group_name = test_group.title
+        self.assertEqual(expected_group_name, str(test_group))
