@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
-{% block content %}
-
+{% block content %}x
 <main>
     <div class="container py-5">
       <div class="row justify-content-center">
@@ -22,29 +21,25 @@
               {% csrf_token %}
                 <input type="hidden" name="" value="">            
                 <div class="form-group row my-3 p-3">
-                  
                   <label for="id_text">
-                    Текст поста                   
+                    {{ form.text.label|safe }} 
                     <span class="required text-danger" >*</span>                  
                   </label>
-                  {{ form.text }}  
+                    {{ form.text }}  
                   <small id="id_text-help" class="form-text text-muted">
-                    Текст нового поста
+                    {{ form.text.help_text|safe }}
                   </small>                  
                 </div>            
                 <div class="form-group row my-3 p-3">
                   <label for="id_group">
-                    Группа                  
+                    {{ form.group.label|safe }}                  
                   </label>
                   <select name="group" class="form-control" id="id_group">
-                    <option value="" selected>---------</option>
-                    {% for group in group_list %}
-                      <option value=""> {{ group }} </option>
-                    {% empty %}
-                    {% endfor %}
+                    <option value="" selected>  </option>
+                    <option value=""> {% for group in form.group %} {{ group }} {% endfor %} </option>                    
                   </select>
                   <small id="id_group-help" class="form-text text-muted">
-                    Группа, к которой будет относиться пост
+                    {{ form.group.help_text|safe }}
                   </small>
                 </div>
                 <div class="d-flex justify-content-end">
@@ -63,7 +58,4 @@
       </div>
     </div>
   </main>
-
-
-
 {% endblock content %}

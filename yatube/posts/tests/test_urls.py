@@ -1,7 +1,7 @@
 from tokenize import group
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
-
+from django.urls import reverse
 
 from posts.models import Post, Group
 
@@ -25,9 +25,7 @@ class PostURLTest(TestCase):
             author=cls.user,
             group=cls.group,
         )
-        
         cls.user2 = User.objects.create(username='nonauthor')
-        
         cls.post2 = Post.objects.create(
             text='test text second post',
             author=cls.user2,
@@ -35,74 +33,71 @@ class PostURLTest(TestCase):
         )
 
     def setUp(self):
+        # неавторизованный клиент
         self.guest_client = Client()
+
+        # авторизованный клиент-автор поста
         self.user = User.objects.get(username='auth')
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
-        
 
+        # авторизованный клиент-не-автор поста
+        self.user2 = User.objects.get(username='nonauthor')
+        self.authorized_client2 = Client()
+        self.authorized_client2.force_login(self.user2)
 
     def test_urls_authorized_author(self):
+        """ URLS | Тестируем совпадение URL и вызываемого шаблона """
         template_url_names = {
-            'posts/index.html': '/',
-            'posts/group_list.html': f'/group/{self.group.slug}/',
-            'posts/profile.html': f'/profile/{self.user.username}/',
-            'posts/post_detail.html': f'/posts/{self.post.pk}/',
-            'posts/post_detail.html': f'/posts/{self.post.pk}/edit',
-            'posts/post_create.html': '/create/',
-            'posts/post_create.html': '/unexisting_page/',
+            '/': 'posts/index.html',
+            '/group/any_slug/': 'posts/group_list.html',
+            '/profile/auth/': 'posts/profile.html',
+            '/posts/1/': 'posts/post_detail.html',
+            # не понимаю почему не проходит тест /posts/1/, нужна помощь
+            '/posts/1/edit/': 'posts/post_create.html',
+            '/create/': 'posts/post_create.html',
+            '/about/tech/': 'about/tech.html',
+            '/about/author/': 'about/author.html',
         }
-        
-        for template, address in template_url_names.items():
-            with self.subTest(address=address):
+        for address, template in template_url_names.items():
+            with self.subTest(address=address, template=template):
                 response = self.authorized_client.get(address)
+                print(response.status_code)
                 self.assertTemplateUsed(response, template)
-
 
     def test_urls_not_authorized(self):
         template_url_names = {
-            'posts/index.html': '/',
-            # 'posts/post_create.html': '/create/',
+            '/': 'posts/index.html',
+            '/group/any_slug/': 'posts/group_list.html',
+            '/profile/auth/': 'posts/profile.html',
+            '/about/tech/': 'about/tech.html',
+            '/about/author/': 'about/author.html',
+            '/posts/1/': 'posts/post_detail.html',
+            # тут тоже самое
         }
-        for template, address in template_url_names.items():
-            with self.subTest(address=address):
+        for address, template in template_url_names.items():
+            with self.subTest(address=address, template=template):
                 response = self.guest_client.get(address)
                 self.assertTemplateUsed(response, template)
-                
+
+    def test_non_author_access_edit(self):
+        """ URLS | Тестируем, что пользователь не может
+        редактировать пост другого автора """
+        response = self.authorized_client2.get('/posts/1/edit')
+        self.assertEqual(response.status_code, 301)
+        print(response.status_code)
+
     def test_404_works(self):
+        """ URLS | Тестируем 404 при вызове несуществующего адреса """
         non_exist_page = '/unexisting_page/'
         response = self.guest_client.get(non_exist_page)
         self.assertEqual(response.status_code, 404)
-        
         response = self.authorized_client.get(non_exist_page)
         self.assertEqual(response.status_code, 404)
 
-
-# перепроверить, низкая уверенность что правильно
-    def non_author_access_edit(self):
-        response = self.authorized_client.get('/posts/{self.post2.pk}/edit')
-        self.assertEqual(response.status_code, 302)
-   
-
-
-
-
-#
-# неясно как отработать кейс доступа для не-автора
-#     def setUp(self):
-#         self.user = User.objects.get(username='nonauthor')
-#         self.authorized_client_nonauthor = Client()
-#         self.authorized_client_nonauthor.force_login(self.user)
-#     
-#     def test_only_author(self):
-#         template_url_name = {
-#             'posts/post_detail.html': f'/posts/{self.post.pk}/edit',
-#         }
-        
-        
-     
-        
-        # def test_task_list_url_exists_at_desired_location(self):
-#        """Страница /task/ доступна авторизованному пользователю."""
-        # response = self.authorized_client.get('/task/')
-        # self.assertEqual(response.status_code, 200)
+    def test_about_url_exists_at_desired_location(self):
+        """ Test static pages tech/author """
+        response = self.guest_client.get('/about/tech/')
+        self.assertEqual(response.status_code, 200)
+        response = self.guest_client.get('/about/author/')
+        self.assertEqual(response.status_code, 200)

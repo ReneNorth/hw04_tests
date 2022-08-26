@@ -21,15 +21,17 @@ class PostTest(unittest.TestCase):
             author=cls.user,
             group=cls.group,
             text='Sed ut perspiciatis unde omnis iste natus error sit'
-            )
-            
+        )
+
     def test_str_post(self):
+        """ MODELS | Тест вывод 15 символов поста """
         post = PostTest.post
         max_len = 15
         text_len = len(str(post))
         self.assertEqual(text_len, max_len)
 
     def test_group_titile(self):
+        """ MODELS | Тест совпадения title """
         group = PostTest.group
         expected_group_name = group.title
         self.assertEqual(expected_group_name, str(group))

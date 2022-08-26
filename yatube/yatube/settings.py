@@ -6,12 +6,7 @@ SECRET_KEY = '00@z=!il*81+08uj@13r6f)@pc#0sndvufm7k8p5+6ufk1z5t*'
 
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '[::1]',
-    'testserver',
-]
+ALLOWED_HOSTS = []
 
 # DEF_NUM_POSTS defines the limit of displayed posts
 DEF_NUM_POSTS = 10
