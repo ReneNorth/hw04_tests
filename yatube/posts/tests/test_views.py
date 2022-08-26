@@ -70,7 +70,7 @@ class PostViewsTest(TestCase):
         self.assertEqual(post_group_title_0, 'test_group')
         self.assertEqual(post_text_0, 'Test text post №13')
         self.assertEqual(post_author_0, 'auth')
-        
+
     def test_profile_content(self):
         """ VIEW | Тестируем контент в context на странице profile """
         response = self.authorized_client.get(
@@ -111,7 +111,7 @@ class PostViewsTest(TestCase):
         self.assertEqual(post_group_title_0, 'test_group')
         self.assertEqual(post_text_0, 'Test text post №13')
         self.assertEqual(post_author_0, 'auth')
-        
+
     def test_new_post_context(self):
         """ Страница НОВОГО поста с правильным контекстом."""
         response = self.authorized_client.get(reverse('posts:post_create'))
