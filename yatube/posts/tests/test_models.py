@@ -7,7 +7,6 @@ from ..models import Post, Group
 User = get_user_model()
 
 
-# @pytest.mark.django_db
 class PostTest(TestCase):
     @classmethod
     def setUpClass(cls):
