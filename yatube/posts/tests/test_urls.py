@@ -49,8 +49,7 @@ class PostURLTest(TestCase):
             '/': 'posts/index.html',
             '/group/any_slug/': 'posts/group_list.html',
             '/profile/auth/': 'posts/profile.html',
-            # '/posts/1/': 'posts/post_detail.html',
-            # не понимаю почему не проходит тест /posts/1/, нужна помощь
+            '/posts/1/': 'posts/post_detail.html',
             '/posts/1/edit/': 'posts/post_create.html',
             '/create/': 'posts/post_create.html',
             '/about/tech/': 'about/tech.html',
@@ -59,7 +58,6 @@ class PostURLTest(TestCase):
         for address, template in template_url_names.items():
             with self.subTest(address=address, template=template):
                 response = self.authorized_client.get(address)
-                print(response.status_code)
                 self.assertTemplateUsed(response, template)
 
     def test_urls_not_authorized(self):
@@ -69,8 +67,7 @@ class PostURLTest(TestCase):
             '/profile/auth/': 'posts/profile.html',
             '/about/tech/': 'about/tech.html',
             '/about/author/': 'about/author.html',
-            # '/posts/1/': 'posts/post_detail.html',
-            # тут тоже самое
+            '/posts/1/': 'posts/post_detail.html',
         }
         for address, template in template_url_names.items():
             with self.subTest(address=address, template=template):
@@ -82,7 +79,6 @@ class PostURLTest(TestCase):
         редактировать пост другого автора """
         response = self.authorized_client2.get('/posts/1/edit')
         self.assertEqual(response.status_code, 301)
-        print(response.status_code)
 
     def test_404_works(self):
         """ URLS | Тестируем 404 при вызове несуществующего адреса """

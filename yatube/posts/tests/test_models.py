@@ -9,7 +9,7 @@ class PostTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user = User.objects.create(username='auth')
+        cls.user = User.objects.create_user(username='auth')
         cls.group = Group.objects.create(
             title='test_title_1',
             slug='test_slug_1',
