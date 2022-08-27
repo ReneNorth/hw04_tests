@@ -1,15 +1,18 @@
 from django.contrib.auth import get_user_model
-import unittest
+from django.test import TestCase
 from ..models import Post, Group
+# import pytest
+
 
 User = get_user_model()
 
 
-class PostTest(unittest.TestCase):
+# @pytest.mark.django_db
+class PostTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user = User.objects.create_user(username='auth')
+        cls.user = User.objects.create(username='auth')
         cls.group = Group.objects.create(
             title='test_title_1',
             slug='test_slug_1',
