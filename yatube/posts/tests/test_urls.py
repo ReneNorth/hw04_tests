@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
 from posts.models import Post, Group
+from http import HTTPStatus
 
 User = get_user_model()
 
@@ -78,19 +79,19 @@ class PostURLTest(TestCase):
         """ URLS | Тестируем, что пользователь не может
         редактировать пост другого автора """
         response = self.authorized_client2.get('/posts/1/edit')
-        self.assertEqual(response.status_code, 301)
+        self.assertEqual(response.status_code, HTTPStatus.MOVED_PERMANENTLY)
 
     def test_404_works(self):
         """ URLS | Тестируем 404 при вызове несуществующего адреса """
         non_exist_page = '/unexisting_page/'
         response = self.guest_client.get(non_exist_page)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
         response = self.authorized_client.get(non_exist_page)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
     def test_about_url_exists_at_desired_location(self):
-        """ Test static pages tech/author """
+        """ Тест страниц tech/author """
         response = self.guest_client.get('/about/tech/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
         response = self.guest_client.get('/about/author/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)

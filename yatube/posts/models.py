@@ -16,6 +16,7 @@ class Group(models.Model):
 class Post(models.Model):
     text = models.TextField(
         verbose_name='Текст поста',
+        help_text='Текстовое поле текст пост'
     )
     pub_date = models.DateTimeField(
         auto_now_add=True, verbose_name='Дата публикации'
@@ -27,6 +28,7 @@ class Post(models.Model):
         null=True,
         related_name='posts',
         verbose_name='Название группы',
+        help_text='Это группы'
     )
     author = models.ForeignKey(
         User,

@@ -14,7 +14,3 @@ class PostForm(forms.ModelForm):
             'text': 'Начните писать! Вдохновение придёт со временем.',
             'group': 'Пост будет относится к выбранной группе',
         }
-
-    def clean_text(self):
-        data = self.cleaned_data['text']
-        return data

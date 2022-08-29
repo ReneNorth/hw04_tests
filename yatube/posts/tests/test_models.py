@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from ..models import Post, Group
-# import pytest
 
 
 User = get_user_model()
@@ -35,3 +34,26 @@ class PostTest(TestCase):
         test_group = PostTest.group
         expected_group_name = test_group.title
         self.assertEqual(expected_group_name, str(test_group))
+
+    def test_verbose_name(self):
+        """ MODELS | Тест соответствия vebose name """
+        help_texts_dict = {
+            'text': 'Текст поста',
+            'group': 'Название группы',
+        }
+        for field, verbose in help_texts_dict.items():
+            with self.subTest(field=field):
+                verbose_test = PostTest.post._meta.get_field(field
+                                                             ).verbose_name
+                self.assertEqual(verbose, verbose_test)
+
+    def test_help_text(self):
+        """ MODELS | Тест соответствия help text"""
+        help_texts_dict = {
+            'text': 'Текстовое поле текст пост',
+            'group': 'Это группы',
+        }
+        for field, text in help_texts_dict.items():
+            with self.subTest(field=field):
+                help_text_test = PostTest.post._meta.get_field(field).help_text
+                self.assertEqual(text, help_text_test)
