@@ -1,14 +1,21 @@
 from django.contrib.auth import get_user_model
-from django.test import TestCase, Client
+from django.test import TestCase, Client, override_settings
 from posts.models import Post, Group
 from django.urls import reverse
+from django.conf import settings
 from django import forms
+import shutil
+import tempfile
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 User = get_user_model()
+
 posts_first_page = 10
 posts_second_page = 4
 
+TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostViewsTest(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -25,11 +32,26 @@ class PostViewsTest(TestCase):
             group=cls.group,
         ) for i in range(0, 13)]
         cls.posts = Post.objects.bulk_create(cls.posts_list)
+        
+        
+        small_gif = (            
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B')
+        
+        uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=small_gif,
+            content_type='image/gif')
 
         cls.post = Post.objects.create(
             text='test text first post',
             author=cls.user,
             group=cls.group,
+            image=uploaded
         )
 
     def setUp(self):
@@ -75,6 +97,7 @@ class PostViewsTest(TestCase):
             first_object.author.username,
             self.post.author.username
         )
+        self.assertEqual(first_object.image, self.post.image)
 
     def test_profile_content(self):
         """ VIEW | Тестируем контент в context на странице profile """
@@ -88,6 +111,7 @@ class PostViewsTest(TestCase):
             first_object.author.username,
             self.post.author.username
         )
+        self.assertEqual(first_object.image, self.post.image)
 
     def test_group_list_content(self):
         """ VIEW | Тестируем контент в context на странице group """
@@ -105,6 +129,7 @@ class PostViewsTest(TestCase):
             first_object.group.description,
             self.post.group.description
         )
+        self.assertEqual(first_object.image, self.post.image)
 
     def test_post_detail(self):
         """ VIEW | Тестируем контент в context на странице поста """
@@ -118,6 +143,7 @@ class PostViewsTest(TestCase):
             first_object.author.username,
             self.post.author.username
         )
+        self.assertEqual(first_object.image, self.post.image)
 
     def test_new_post_context(self):
         """ Страница НОВОГО поста с правильным контекстом."""
@@ -153,7 +179,7 @@ class PostViewsTest(TestCase):
         self.assertEqual(len(response.context['page_obj']), posts_first_page)
 
     def test_second_page_contains_four_records(self):
-        """ VIEW | Проверка: количество постов d index на второй странице. """
+        """ VIEW | Проверка: количество постов в index на второй странице. """
         response = self.client.get(reverse('posts:index') + '?page=2')
         self.assertEqual(len(response.context['page_obj']), posts_second_page)
 

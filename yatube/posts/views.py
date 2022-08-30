@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Post, Group
-from .forms import PostForm
+from .models import Post, Group, Comment
+from .forms import PostForm, CommentForm
 from yatube.settings import DEF_NUM_POSTS
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -49,15 +49,25 @@ def profile(request, username):
 
 def post_detail(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
+    comment_list = post.comments.all()
+    form = CommentForm(
+        request.POST or None,
+    )
+    # comments = get_object_or_404(Comment)
     context = {
         'post': post,
+        'comments': comment_list,
+        'form': form,
     }
     return render(request, 'posts/post_detail.html', context)
 
 
 @login_required
 def post_create(request):
-    form = PostForm(request.POST or None)
+    form = PostForm(
+        request.POST or None,
+        files=request.FILES or None
+    )
     if request.method == 'POST':
         if form.is_valid():
             post = form.save(commit=False)
@@ -75,7 +85,11 @@ def post_edit(request, post_id):
     is_edit = True
     if post.author != request.user:
         return redirect('posts:post_detail', post_id)
-    form = PostForm(request.POST or None, instance=post)
+    form = PostForm(
+        request.POST or None,
+        files=request.FILES or None,
+        instance=post
+    )
     if form.is_valid():
         post.save()
         return redirect('posts:post_detail', post_id)
@@ -85,3 +99,15 @@ def post_edit(request, post_id):
         'is_edit': is_edit,
     }
     return render(request, 'posts/post_create.html', context)
+
+
+@login_required
+def add_comment(request, post_id):
+    post = get_object_or_404(Post, pk=post_id)
+    form = CommentForm(request.POST or None)
+    if form.is_valid():
+        comment = form.save(commit=False)
+        comment.author = request.user
+        comment.post = post
+        comment.save()
+    return redirect('posts:post_detail', post_id=post_id)
