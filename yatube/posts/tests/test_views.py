@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client, override_settings
-from posts.models import Post, Group
+from posts.models import Post, Group, Follow
 from django.urls import reverse
 from django.conf import settings
 from django import forms
@@ -9,14 +9,17 @@ import tempfile
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.views.decorators.cache import cache_page
 from django.core.cache import cache
+from django.shortcuts import get_object_or_404
 
 
 User = get_user_model()
 
 posts_first_page = 10
 posts_second_page = 4
+num_objects_created = 1
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
+
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostViewsTest(TestCase):
@@ -24,6 +27,7 @@ class PostViewsTest(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = User.objects.create_user(username='auth')
+        cls.user2 = User.objects.create_user(username='author')
         cls.group = Group.objects.create(
             title='test_group',
             slug='any_slug',
@@ -62,6 +66,10 @@ class PostViewsTest(TestCase):
         self.user = User.objects.get(username='auth')
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
+
+        self.user2 = User.objects.get(username='author')
+        self.authorized_author = Client()
+        self.authorized_author.force_login(self.user2)
 
     def test_about_page_uses_correct_template2(self):
         """ VIEW | view-классы используют ожидаемые HTML-шаблоны """
@@ -250,3 +258,70 @@ class PostViewsTest(TestCase):
             ) + '?page=2'
         )
         self.assertEqual(len(response.context['page_obj']), posts_second_page)
+
+    def test_subscribe_unsubscribe(self):
+        """ VIEWS | Тестируем подписку """
+        followers_num_0 = 0
+        self.authorized_client.get(
+            reverse(
+                'posts:profile_follow',
+                kwargs={'username': self.user2.username})
+        )
+        self.assertEqual(len(
+            Follow.objects.all().filter(user_id=self.user)
+        ), followers_num_0 + num_objects_created)
+
+        self.authorized_client.get(
+            reverse(
+                'posts:profile_unfollow',
+                kwargs={'username': self.user2.username})
+        )
+        self.assertEqual(len(
+            Follow.objects.all().filter(user_id=self.user)
+        ), followers_num_0)
+
+    def test_follow_feed(self):
+        """ VIEWS | На странице подписок корректное количество постов """
+        # Создаем пост для теста подписок
+        Post.objects.create(
+            text='subscription_test',
+            author=self.user2,
+            group=self.group,
+        )
+        followers_num_0 = 0
+        # Подписываем пользователя на автора
+        self.authorized_client.get(
+            reverse(
+                'posts:profile_follow',
+                kwargs={'username': self.user2.username})
+        )
+
+        # Проверяем, что подписались успешно
+        self.assertEqual(len(
+            Follow.objects.all().filter(user_id=self.user)
+        ), followers_num_0 + num_objects_created)
+
+        # Проверяем, что в фиде подписок один пост
+        response = self.authorized_client.get(
+            reverse('posts:follow_index')
+        )
+        self.assertEqual(
+            len(response.context['page_obj']),
+            num_objects_created
+        )
+
+        # Отписываемся
+        self.authorized_client.get(
+            reverse(
+                'posts:profile_unfollow',
+                kwargs={'username': self.user2.username})
+        )
+
+        # Проверяем, что в фид подписок пустой
+        response = self.authorized_client.get(
+            reverse('posts:follow_index')
+        )
+        self.assertEqual(
+            len(response.context['page_obj']),
+            followers_num_0
+        )

@@ -19,7 +19,8 @@ class Post(models.Model):
         help_text='Текстовое поле текст пост'
     )
     pub_date = models.DateTimeField(
-        auto_now_add=True, verbose_name='Дата публикации'
+        auto_now_add=True, 
+        verbose_name='Дата публикации'
     )
     group = models.ForeignKey(
         Group,
@@ -74,7 +75,22 @@ class Comment(models.Model):
     def __str__(self):
         return self.text[:15]
 
-    # class Meta:
-    #     ordering = ['-pub_date']
-    #    verbose_name = 'Комментарий'
-    #    verbose_name = 'Комментарии'
+    class Meta:
+        ordering = ['-created']
+        verbose_name = 'Комментарий'
+        verbose_name = 'Комментарии'
+        
+
+class Follow(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='follower'
+
+    )
+
+    author = models.ForeignKey(   #ссылка на объект пользователя, на которого подписываются
+        User,
+        on_delete=models.CASCADE,
+        related_name='following'
+    )
