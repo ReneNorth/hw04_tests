@@ -5,6 +5,7 @@ from yatube.settings import DEF_NUM_POSTS
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.contrib.auth import get_user_model
+from django.views.decorators.cache import cache_page
 
 
 User = get_user_model()
@@ -16,6 +17,7 @@ def paginator(list_of_posts, request):
     return paginator.get_page(page_number)
 
 
+@cache_page(1 * 20, key_prefix='index_page')
 def index(request):
     post_list = Post.objects.all().select_related('author', 'group')
     page_obj = paginator(post_list, request)

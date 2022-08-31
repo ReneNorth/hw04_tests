@@ -4,9 +4,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = '00@z=!il*81+08uj@13r6f)@pc#0sndvufm7k8p5+6ufk1z5t*'
 
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '[::1]',
+    'testserver',
+]
 
 # DEF_NUM_POSTS defines the limit of displayed posts
 DEF_NUM_POSTS = 10
@@ -15,6 +20,9 @@ DEF_NUM_POSTS = 10
 
 LOGIN_URL = 'users:login'
 LOGIN_REDIRECT_URL = 'posts:index'
+
+# Custom handlers
+CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
 
 # Post server simulation
 
@@ -109,4 +117,10 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 STATIC_URL = "/static/"
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media') 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}

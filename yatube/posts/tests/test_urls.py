@@ -63,7 +63,6 @@ class PostURLTest(TestCase):
 
     def test_urls_not_authorized(self):
         template_url_names = {
-            '/': 'posts/index.html',
             '/group/any_slug/': 'posts/group_list.html',
             '/profile/auth/': 'posts/profile.html',
             '/about/tech/': 'about/tech.html',
