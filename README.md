@@ -1,3 +1,8 @@
 # hw04_tests
+Testing with Unittest 
 
-[![CI](https://github.com/yandex-praktikum/hw04_tests/actions/workflows/python-app.yml/badge.svg?branch=master)](https://github.com/yandex-praktikum/hw04_tests/actions/workflows/python-app.yml)
+The tests cover: 
+- Models
+- URLs
+- Namespaces and templates
+- Forms and Views
